@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Tin học 9 · Bài 3 – Đánh giá chất lượng thông tin</title>
+<style>
+  :root{
+    --bg:#EEF2F6;
+    --panel:#FFFFFF;
+    --ink:#0E1B2C;
+    --ink-soft:#4A5A70;
+    --ink-faint:#8494A7;
+    --accent:#0E7C86;
+    --accent-dark:#0B5F67;
+    --accent-soft:#E3F2F1;
+    --navy:#0E1B2C;
+    --navy-soft:#16273D;
+    --amber:#9A6400;
+    --amber-soft:#FBF0DC;
+    --danger:#B3261E;
+    --danger-soft:#FBE7E5;
+    --success:#167A4B;
+    --success-soft:#E4F5EC;
+    --border:#D9E1EA;
+    --radius:14px;
+    --radius-sm:9px;
+    --shadow:0 2px 10px rgba(14,27,44,.07);
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  :root{
+    padding-top:env(safe-area-inset-top, 0px);
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
+  html{scroll-padding-top:env(safe-area-inset-top, 0px);height:100%;}
+  html,body{margin:0;padding:0;}
+  body{
+    height:100%;
+    font-family:var(--sans);
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  button{font-family:inherit;}
+  h1,h2,h3,p{margin:0;}
+  .hidden{display:none !important;}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+  ::selection{background:var(--accent-soft);}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001s !important;transition-duration:.001s !important;}}
+
+  /* ---------- layout shells ---------- */
+  #app{min-height:100%;display:flex;flex-direction:column;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px;width:100%;}
+  .wrap-wide{max-width:980px;margin:0 auto;padding:0 20px;width:100%;}
+
+  /* ---------- welcome screen ---------- */
+  #screen-welcome{
+    flex:1;display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(14,124,134,.35), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(14,124,134,.25), transparent 45%),
+      var(--navy);
+    padding:40px 16px;
+  }
+  .welcome-card{
+    background:var(--navy-soft);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:20px;
+    padding:40px 36px;
+    max-width:460px;
+    width:100%;
+    color:#fff;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+  }
+  .welcome-kicker{
+    display:flex;align-items:center;gap:10px;
+    font-size:13px;letter-spacing:.02em;color:#8FD9DC;margin-bottom:18px;
+  }
+  .welcome-kicker .dot{width:7px;height:7px;border-radius:50%;background:#37D2C0;box-shadow:0 0 0 4px rgba(55,210,192,.18);}
+  .welcome-card h1{font-size:26px;font-weight:700;letter-spacing:-.01em;line-height:1.28;margin-bottom:6px;}
+  .welcome-card .teacher{color:#B7C4D4;font-size:14.5px;margin-bottom:28px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;color:#B7C4D4;margin-bottom:6px;}
+  .field input, .field select{
+    width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.16);
+    background:rgba(255,255,255,.06);color:#fff;font-size:15.5px;
+  }
+  .field input::placeholder{color:#7E8CA0;}
+  .field input:focus, .field select:focus{border-color:#37D2C0;background:rgba(255,255,255,.09);}
+  .field select option{color:#111;}
+  .btn{
+    appearance:none;border:none;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:600;
+    cursor:pointer;transition:transform .08s ease, box-shadow .08s ease, background .15s ease, opacity .15s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:var(--accent-dark);}
+  .btn-primary:disabled{background:#3A5A5D;color:#9FB4B6;cursor:not-allowed;}
+  .btn-block{width:100%;}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--border);}
+  .btn-ghost:hover{background:#fff;border-color:var(--ink-faint);}
+  .btn-ghost-dark{background:transparent;color:#B7C4D4;border:1px solid rgba(255,255,255,.18);}
+  .btn-ghost-dark:hover{background:rgba(255,255,255,.06);}
+  .btn-sm{padding:8px 14px;font-size:13.5px;border-radius:8px;}
+  .welcome-error{color:#FF9E96;font-size:13.5px;margin:-6px 0 14px;min-height:1px;}
+  .welcome-resume{margin-top:14px;text-align:center;}
+  .welcome-resume button{background:none;border:none;color:#8FD9DC;font-size:13px;cursor:pointer;text-decoration:underline;padding:4px;}
+
+  /* ---------- top bar (lesson) ---------- */
+  #topbar{
+    position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;background:var(--panel);border-bottom:1px solid var(--border);
+    padding:12px 0;
+  }
+  .topbar-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .who{display:flex;align-items:center;gap:14px;font-size:13.5px;color:var(--ink-soft);}
+  .who b{color:var(--ink);}
+  .who .sep{width:1px;height:14px;background:var(--border);}
+  .steps{display:flex;align-items:center;gap:0;}
+  .step{display:flex;align-items:center;}
+  .step-dot{
+    width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;border:2px solid var(--border);color:var(--ink-faint);background:#fff;
+    flex-shrink:0;transition:all .2s ease;
+  }
+  .step-dot.done{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .step-dot.current{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
+  .step-line{width:22px;height:2px;background:var(--border);}
+  .step-line.done{background:var(--accent);}
+  .sync-badge{font-size:12px;color:var(--ink-faint);display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .gear-btn{
+    position:fixed;top:calc(14px + env(safe-area-inset-top, 0px));right:14px;z-index:40;width:38px;height:38px;border-radius:50%;
+    background:rgba(14,27,44,.06);border:1px solid var(--border);cursor:pointer;font-size:16px;
+    display:flex;align-items:center;justify-content:center;color:var(--ink-soft);
+  }
+  .gear-btn:hover{background:rgba(14,27,44,.1);}
+
+  /* ---------- lesson body ---------- */
+  #lesson-body{flex:1;padding:32px 0 calc(90px + env(safe-area-inset-bottom, 0px));}
+  .part{display:none;}
+  .part.active{display:block;animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .part-label{font-size:13.5px;color:var(--accent-dark);font-weight:600;margin-bottom:8px;}
+  .part-title{font-size:23px;font-weight:700;letter-spacing:-.01em;margin-bottom:10px;line-height:1.3;}
+  .part-intro{color:var(--ink-soft);font-size:15px;margin-bottom:26px;max-width:62ch;}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+  .card + .card{margin-top:14px;}
+
+  /* prediction (part 1) */
+  .predict-grid{display:grid;gap:10px;margin-bottom:22px;}
+  .predict-option{
+    text-align:left;background:var(--panel);border:1.5px solid var(--border);border-radius:var(--radius);
+    padding:16px 18px;cursor:pointer;font-size:15px;color:var(--ink);transition:border-color .15s ease, background .15s ease;
+  }
+  .predict-option:hover{border-color:var(--ink-faint);}
+  .predict-option.selected{border-color:var(--accent);background:var(--accent-soft);}
+
+  /* goal chips (part 2) */
+  .goal-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+  .goal-chip{
+    border:1.5px solid var(--border);background:#fff;border-radius:999px;padding:9px 16px;font-size:13.5px;
+    cursor:pointer;color:var(--ink-soft);display:flex;align-items:center;gap:7px;
+  }
+  .goal-chip .tick{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;}
+  .goal-chip.active{border-color:var(--accent);color:var(--accent-dark);background:var(--accent-soft);font-weight:600;}
+  .goal-chip.active .tick{background:var(--accent);border-color:var(--accent);}
+  .goal-chip.complete .tick{background:var(--success);border-color:var(--success);}
+
+  .result-grid{display:grid;gap:12px;}
+  .result-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:17px 18px;}
+  .result-meta{display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
+  .source-tag{
+    font-size:11px;font-weight:700;letter-spacing:.02em;padding:2px 8px;border-radius:5px;
+  }
+  .tag-official-edu{background:var(--success-soft);color:var(--success);}
+  .tag-official-school{background:var(--success-soft);color:var(--success);}
+  .tag-forum{background:var(--amber-soft);color:var(--amber);}
+  .tag-social{background:var(--amber-soft);color:var(--amber);}
+  .tag-news{background:#E7EEFB;color:#2452B5;}
+  .tag-ai{background:#F1E8FB;color:#6B33B0;}
+  .result-site{font-family:var(--mono);font-size:12px;color:var(--ink-faint);}
+  .result-date{font-size:12px;color:var(--ink-faint);margin-left:auto;}
+  .result-title{font-size:15.5px;font-weight:600;margin-bottom:4px;}
+  .result-snippet{font-size:13.5px;color:var(--ink-soft);margin-bottom:13px;}
+  .classify-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .classify-btn{
+    border:1.5px solid var(--border);background:#fff;border-radius:8px;padding:8px 13px;font-size:13px;
+    cursor:pointer;color:var(--ink-soft);
+  }
+  .classify-btn:hover{border-color:var(--ink-faint);}
+  .classify-btn.chosen-correct{border-color:var(--success);background:var(--success-soft);color:var(--success);font-weight:600;}
+  .classify-btn.chosen-wrong{border-color:var(--danger);background:var(--danger-soft);color:var(--danger);font-weight:600;}
+  .result-feedback{margin-top:12px;padding:11px 13px;border-radius:9px;font-size:13.5px;display:none;}
+  .result-feedback.show{display:block;}
+  .result-feedback.ok{background:var(--success-soft);color:var(--success);}
+  .result-feedback.retry{background:var(--danger-soft);color:var(--danger);}
+
+  /* quiz (part 3) */
+  .quiz-q{margin-bottom:6px;}
+  .quiz-q .q-num{font-size:12.5px;color:var(--ink-faint);margin-bottom:4px;}
+  .quiz-q .q-text{font-size:15.5px;font-weight:600;margin-bottom:12px;}
+  .quiz-opts{display:grid;gap:8px;}
+  .quiz-opt{
+    text-align:left;border:1.5px solid var(--border);background:#fff;border-radius:10px;padding:12px 14px;
+    font-size:14.5px;cursor:pointer;color:var(--ink);
+  }
+  .quiz-opt:hover{border-color:var(--ink-faint);}
+  .quiz-opt.correct{border-color:var(--success);background:var(--success-soft);}
+  .quiz-opt.wrong{border-color:var(--danger);background:var(--danger-soft);}
+  .quiz-feedback{margin-top:12px;padding:12px 14px;border-radius:9px;font-size:13.5px;display:none;}
+  .quiz-feedback.show{display:block;}
+  .quiz-feedback.ok{background:var(--success-soft);color:var(--success);}
+  .quiz-feedback.retry{background:var(--amber-soft);color:var(--amber);}
+  .retry-btn{margin-top:10px;}
+
+  .match-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);}
+  .match-row:last-child{border-bottom:none;}
+  .match-label{flex:0 0 160px;font-weight:600;font-size:14.5px;}
+  .match-row select{flex:1;padding:9px 11px;border-radius:8px;border:1px solid var(--border);font-size:13.5px;background:#fff;}
+  .match-row.correct select{border-color:var(--success);}
+  .match-row.wrong select{border-color:var(--danger);}
+
+  /* ranking (part 4) */
+  .rank-list{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+  .rank-item{
+    display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--border);
+    border-radius:var(--radius);padding:14px 16px;
+  }
+  .rank-num{
+    width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:13px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .rank-body{flex:1;}
+  .rank-name{font-weight:700;font-size:15px;}
+  .rank-facts{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+  .rank-move{display:flex;flex-direction:column;gap:3px;}
+  .rank-move button{
+    width:28px;height:24px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;
+    font-size:12px;color:var(--ink-soft);
+  }
+  .rank-move button:disabled{opacity:.3;cursor:not-allowed;}
+  textarea{
+    width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14.5px;
+    font-family:inherit;resize:vertical;min-height:76px;background:#fff;color:var(--ink);
+  }
+  textarea:focus{border-color:var(--accent);}
+  .field-note{font-size:12.5px;color:var(--ink-faint);margin-top:6px;}
+
+  /* exit ticket (part 5) */
+  .exit-q{margin-bottom:24px;}
+  .exit-q .q-num{font-size:12.5px;color:var(--ink-faint);margin-bottom:4px;}
+  .exit-q .q-text{font-size:15px;font-weight:600;margin-bottom:10px;}
+  .mood-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .mood-btn{
+    flex:1;min-width:120px;border:1.5px solid var(--border);background:#fff;border-radius:12px;
+    padding:14px 10px;text-align:center;cursor:pointer;font-size:13px;color:var(--ink-soft);
+  }
+  .mood-btn .em{font-size:24px;display:block;margin-bottom:6px;}
+  .mood-btn.selected{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-dark);font-weight:600;}
+
+  /* nav footer */
+  .part-nav{
+    position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--border);
+    padding:14px 0 calc(14px + env(safe-area-inset-bottom, 0px));z-index:15;
+  }
+  .part-nav-row{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .nav-hint{font-size:12.5px;color:var(--ink-faint);}
+
+  /* completion */
+  #screen-complete{
+    flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px;
+    background:radial-gradient(circle at 30% 20%, rgba(14,124,134,.15), transparent 45%), var(--bg);
+  }
+  .complete-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:42px 36px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow);}
+  .complete-card .big-emoji{font-size:42px;margin-bottom:10px;}
+  .complete-card h2{font-size:22px;margin-bottom:6px;}
+  .xp-total{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--accent-dark);margin:18px 0 4px;}
+  .complete-stats{display:flex;justify-content:center;gap:26px;margin:20px 0 26px;font-size:13.5px;color:var(--ink-soft);}
+  .complete-stats b{display:block;color:var(--ink);font-size:16px;}
+
+  /* xp toast */
+  #xp-toast{
+    position:fixed;top:calc(64px + env(safe-area-inset-top, 0px));right:16px;z-index:50;background:var(--navy);color:#fff;padding:9px 16px;
+    border-radius:999px;font-size:13px;font-weight:600;box-shadow:0 8px 22px rgba(0,0,0,.25);
+    opacity:0;transform:translateY(-8px);transition:opacity .2s ease, transform .2s ease;pointer-events:none;
+  }
+  #xp-toast.show{opacity:1;transform:none;}
+
+  /* teacher mode */
+  #teacher-overlay{
+    position:fixed;inset:0;background:rgba(14,27,44,.55);z-index:60;display:flex;align-items:flex-start;justify-content:center;
+    padding:30px 14px;overflow:auto;
+  }
+  .teacher-modal{background:#fff;border-radius:16px;max-width:360px;width:100%;padding:28px;margin-top:60px;}
+  .teacher-modal h3{font-size:17px;margin-bottom:14px;}
+  .teacher-dash{background:var(--bg);border-radius:16px;max-width:980px;width:100%;padding:0;margin:10px 0;min-height:80vh;}
+  .teacher-head{background:var(--navy);color:#fff;padding:18px 24px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center;}
+  .teacher-head h3{font-size:16px;}
+  .teacher-head button{background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:13px;}
+  .teacher-tabs{display:flex;gap:4px;padding:14px 24px 0;background:#fff;border-bottom:1px solid var(--border);}
+  .t-tab{border:none;background:none;padding:10px 14px;font-size:13.5px;color:var(--ink-soft);cursor:pointer;border-bottom:2px solid transparent;}
+  .t-tab.active{color:var(--accent-dark);border-color:var(--accent);font-weight:600;}
+  .teacher-body{padding:22px 24px 30px;background:#fff;border-radius:0 0 16px 16px;}
+  .t-panel{display:none;}
+  .t-panel.active{display:block;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
+  .stat-box{border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+  .stat-box .num{font-size:22px;font-weight:700;font-family:var(--mono);}
+  .stat-box .lbl{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .t-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .t-table th{text-align:left;padding:9px 10px;color:var(--ink-faint);font-weight:600;border-bottom:1px solid var(--border);font-size:12px;}
+  .t-table td{padding:10px;border-bottom:1px solid var(--border);}
+  .t-table tr:hover td{background:var(--accent-soft);cursor:pointer;}
+  .t-controls{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+  .t-controls input, .t-controls select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;}
+  .status-pill{font-size:11.5px;padding:2px 9px;border-radius:999px;font-weight:600;}
+  .pill-doing{background:var(--success-soft);color:var(--success);}
+  .pill-done{background:var(--accent-soft);color:var(--accent-dark);}
+  .pill-notstarted{background:var(--danger-soft);color:var(--danger);}
+  .live-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+  .live-card{border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:13px;}
+  .live-card .nm{font-weight:600;margin-bottom:4px;}
+  .empty-note{color:var(--ink-soft);font-size:13.5px;background:var(--bg);border-radius:10px;padding:16px;line-height:1.6;}
+  #student-detail{border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:16px;}
+  #student-detail h4{font-size:15px;margin-bottom:10px;}
+  .detail-row{display:flex;justify-content:space-between;font-size:13.5px;padding:7px 0;border-bottom:1px dashed var(--border);gap:10px;}
+  .detail-row .k{color:var(--ink-soft);}
+
+  @media (max-width:640px){
+    .welcome-card{padding:30px 22px;}
+    .who{gap:8px;}
+    .who .sep{display:none;}
+    .match-label{flex-basis:110px;font-size:13px;}
+    .rank-facts{display:none;}
+    .step-line{width:12px;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <button class="gear-btn hidden" id="gear-btn" title="Chế độ giáo viên" aria-label="Chế độ giáo viên">⚙️</button>
+
+  <!-- ============ WELCOME ============ -->
+  <section id="screen-welcome">
+    <div class="welcome-card">
+      <div class="welcome-kicker"><span class="dot"></span> TIN HỌC 9</div>
+      <h1>Bài 3: Thực hành – Đánh giá chất lượng thông tin</h1>
+      <p class="teacher">Giáo viên: Huỳnh Văn Diễn</p>
+
+      <div class="field">
+        <label for="in-name">Họ và tên học sinh</label>
+        <input id="in-name" type="text" placeholder="Nguyễn Văn A" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="in-class">Lớp</label>
+        <select id="in-class">
+          <option value="">— Chọn lớp —</option>
+          <option>9A1</option><option>9A2</option><option>9A3</option><option>9A4</option>
+          <option>9A5</option><option>9A6</option><option>9A7</option><option>9A8</option>
+          <option value="__other">Lớp khác…</option>
+        </select>
+      </div>
+      <div class="field hidden" id="field-class-other">
+        <label for="in-class-other">Nhập tên lớp</label>
+        <input id="in-class-other" type="text" placeholder="VD: 9B2">
+      </div>
+      <div class="welcome-error" id="welcome-error"></div>
+      <button class="btn btn-primary btn-block" id="btn-start">Bắt đầu bài học 🚀</button>
+      <div class="welcome-resume hidden" id="welcome-resume">
+        <button id="btn-new-session">Bắt đầu phiên mới (xoá tiến trình đã lưu)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LESSON ============ -->
+  <section id="screen-lesson" class="hidden">
+    <div id="topbar">
+      <div class="wrap-wide topbar-row">
+        <div class="who">
+          <span>👤 <b id="who-name">—</b></span>
+          <span class="sep"></span>
+          <span>🏫 <b id="who-class">—</b></span>
+          <span class="sep"></span>
+          <span id="sync-badge" class="sync-badge">● chưa cấu hình đồng bộ</span>
+        </div>
+        <div class="steps" id="steps-row"></div>
+      </div>
+    </div>
+
+    <div id="lesson-body" class="wrap">
+
+      <!-- PART 1 -->
+      <div class="part" data-part="1">
+        <div class="part-label">Phần 1 · Khởi động</div>
+        <h2 class="part-title">Trước khi tìm, em dự đoán thử xem</h2>
+        <p class="part-intro">Sắp tới em sẽ phải chọn trường THPT. Theo em, khi gõ cụm từ "trường THPT tốt" lên Internet, điều gì có khả năng xảy ra nhất? Chọn một dự đoán — chưa cần đúng, phần sau sẽ cho em kiểm chứng.</p>
+        <div class="predict-grid" id="predict-grid"></div>
+        <div class="nav-hint">Chọn một phương án để tiếp tục.</div>
+      </div>
+
+      <!-- PART 2 -->
+      <div class="part" data-part="2">
+        <div class="part-label">Phần 2 · Khám phá kiến thức</div>
+        <h2 class="part-title">Trạm tìm kiếm thông tin</h2>
+        <p class="part-intro">Chọn một mục đích tìm kiếm bên dưới. Với mỗi kết quả tìm được, hãy đọc kỹ nguồn và ngày đăng, sau đó xếp loại: nguồn này dùng được ngay, cần đối chiếu thêm, hay không phù hợp cho mục đích đang chọn. Hoàn thành cả 3 mục đích để mở khoá phần tiếp theo.</p>
+        <div class="goal-row" id="goal-row"></div>
+        <div class="result-grid" id="result-grid"></div>
+      </div>
+
+      <!-- PART 3 -->
+      <div class="part" data-part="3">
+        <div class="part-label">Phần 3 · Hiểu bản chất</div>
+        <h2 class="part-title">Áp dụng 4 tiêu chí đánh giá thông tin</h2>
+        <p class="part-intro">Từ những gì vừa quan sát ở Trạm tìm kiếm, hãy áp dụng 4 tiêu chí: <b>tính mới</b>, <b>tính chính xác</b>, <b>tính đầy đủ</b>, <b>tính sử dụng được</b> vào các tình huống sau.</p>
+        <div id="quiz-list"></div>
+        <div class="card" id="match-card" style="margin-top:18px;">
+          <div class="quiz-q"><div class="q-num">Câu ghép</div><div class="q-text">Ghép mỗi tiêu chí với định nghĩa đúng của nó</div></div>
+          <div id="match-list"></div>
+          <button class="btn btn-primary btn-sm" id="btn-check-match" style="margin-top:12px;">Kiểm tra</button>
+          <div class="quiz-feedback" id="match-feedback"></div>
+        </div>
+      </div>
+
+      <!-- PART 4 -->
+      <div class="part" data-part="4">
+        <div class="part-label">Phần 4 · Vận dụng</div>
+        <h2 class="part-title">Chọn nguyện vọng dựa trên chất lượng thông tin</h2>
+        <p class="part-intro">Em đã thu thập thông tin về 3 trường. Hãy xếp lại thứ tự ưu tiên <b>dựa trên chất lượng thông tin thu thập được</b> (không phải cảm tính), dùng nút ▲▼ để sắp xếp.</p>
+        <div class="rank-list" id="rank-list"></div>
+        <div class="field">
+          <label for="rank-reason" style="font-size:13.5px;color:var(--ink-soft);display:block;margin-bottom:6px;">Vì sao em xếp thứ tự này?</label>
+          <textarea id="rank-reason" placeholder="Giải thích ngắn gọn lý do em chọn thứ tự trên…"></textarea>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-submit-rank" style="margin:12px 0 22px;">Ghi nhận thứ tự</button>
+        <div class="quiz-feedback" id="rank-feedback" style="margin-bottom:22px;"></div>
+
+        <div class="card">
+          <div class="quiz-q">
+            <div class="q-num">Tình huống</div>
+            <div class="q-text">Em tìm được một bình luận tiêu cực về một trường trong hội nhóm Facebook, chưa thấy nguồn nào khác xác nhận. Em sẽ làm gì?</div>
+          </div>
+          <div class="quiz-opts" id="scenario-opts"></div>
+          <div class="quiz-feedback" id="scenario-feedback"></div>
+        </div>
+      </div>
+
+      <!-- PART 5 -->
+      <div class="part" data-part="5">
+        <div class="part-label">Phần 5 · Exit ticket</div>
+        <h2 class="part-title">Nhìn lại bài học</h2>
+
+        <div class="exit-q">
+          <div class="q-num">Câu 1</div>
+          <div class="q-text">Một kiến thức quan trọng em học được hôm nay</div>
+          <textarea id="exit-q1" placeholder="Viết 1–2 câu…"></textarea>
+        </div>
+
+        <div class="exit-q">
+          <div class="q-num">Câu 2</div>
+          <div class="q-text">Thông tin về điểm chuẩn tuyển sinh lớp 10 nên tìm ở đâu để đáng tin cậy nhất?</div>
+          <div class="quiz-opts" id="exit-q2-opts"></div>
+        </div>
+
+        <div class="exit-q">
+          <div class="q-num">Câu 3</div>
+          <div class="q-text">Tình huống vận dụng: nếu em tìm được 2 nguồn mâu thuẫn nhau về học phí một trường, em sẽ xử lý thế nào?</div>
+          <textarea id="exit-q3" placeholder="Viết cách em sẽ làm…"></textarea>
+        </div>
+
+        <div class="exit-q">
+          <div class="q-num">Câu 4</div>
+          <div class="q-text">Mức độ em hiểu bài</div>
+          <div class="mood-row" id="mood-row"></div>
+        </div>
+
+        <div class="exit-q">
+          <div class="q-num">Câu 5</div>
+          <div class="q-text">Điều em vẫn còn thắc mắc (không bắt buộc)</div>
+          <textarea id="exit-q5" placeholder="Nếu không có thắc mắc, để trống cũng được…"></textarea>
+        </div>
+
+        <button class="btn btn-primary" id="btn-finish">Hoàn thành bài học</button>
+      </div>
+
+    </div>
+
+    <div class="part-nav">
+      <div class="wrap part-nav-row">
+        <button class="btn btn-ghost btn-sm" id="btn-back">← Quay lại</button>
+        <span class="nav-hint" id="nav-hint"></span>
+        <button class="btn btn-primary btn-sm" id="btn-next">Tiếp tục →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMPLETE ============ -->
+  <section id="screen-complete" class="hidden">
+    <div class="complete-card">
+      <div class="big-emoji">🎉</div>
+      <h2>Hoàn thành bài học</h2>
+      <p style="color:var(--ink-soft);font-size:14px;" id="complete-who"></p>
+      <div class="xp-total" id="complete-xp">0 XP</div>
+      <div class="complete-stats">
+        <div><b id="complete-progress">5/5</b>Phần hoàn thành</div>
+        <div><b id="complete-score">0%</b>Điểm kiến thức</div>
+      </div>
+      <button class="btn btn-ghost btn-block" id="btn-review">Xem lại bài học</button>
+    </div>
+  </section>
+
+</div>
+
+<div id="xp-toast">+10 XP</div>
+
+<!-- ============ TEACHER PIN ============ -->
+<div id="teacher-pin-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(14,27,44,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;">
+  <div class="teacher-modal">
+    <h3>⚙️ Chế độ giáo viên</h3>
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">Nhập PIN để mở bảng điều khiển. (PIN mặc định — giáo viên nên đổi trong mã nguồn, xem README.)</p>
+    <div class="field"><input id="pin-input" type="password" placeholder="Nhập PIN" inputmode="numeric"></div>
+    <div class="welcome-error" id="pin-error"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" id="pin-cancel">Huỷ</button>
+      <button class="btn btn-primary btn-sm" id="pin-submit">Mở bảng điều khiển</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TEACHER DASHBOARD ============ -->
+<div id="teacher-overlay" class="hidden">
+  <div class="teacher-dash">
+    <div class="teacher-head">
+      <h3>Teacher Mode · Bài 3 – Đánh giá chất lượng thông tin</h3>
+      <button id="teacher-close">Đóng</button>
+    </div>
+    <div class="teacher-tabs">
+      <button class="t-tab active" data-tab="overview">Tổng quan lớp</button>
+      <button class="t-tab" data-tab="results">Bảng kết quả</button>
+      <button class="t-tab" data-tab="live">Lớp học trực tiếp</button>
+    </div>
+    <div class="teacher-body">
+      <div id="t-loading" class="empty-note hidden">Đang tải dữ liệu từ Google Sheet…</div>
+      <div id="t-empty" class="empty-note hidden"></div>
+
+      <div class="t-panel active" data-tpanel="overview" id="t-overview"></div>
+
+      <div class="t-panel" data-tpanel="results">
+        <div class="t-controls">
+          <input id="t-search" type="text" placeholder="Tìm theo tên hoặc lớp…">
+          <select id="t-filter">
+            <option value="all">Tất cả</option>
+            <option value="done">Đã hoàn thành</option>
+            <option value="notdone">Chưa hoàn thành</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" id="t-refresh">🔄 Làm mới</button>
+        </div>
+        <table class="t-table" id="t-table">
+          <thead><tr><th>Họ tên</th><th>Lớp</th><th>Tiến độ</th><th>Điểm</th><th>Exit ticket</th><th>Thời gian</th></tr></thead>
+          <tbody id="t-table-body"></tbody>
+        </table>
+        <div id="student-detail" class="hidden"></div>
+      </div>
+
+      <div class="t-panel" data-tpanel="live">
+        <div class="live-grid" id="live-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* =====================================================================
+   0. CẤU HÌNH — giáo viên chỉnh ở đây
+   ===================================================================== */
+var GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE"; // dán URL Web App sau khi deploy Code.gs
+var TEACHER_PIN = "2025"; // đổi PIN tại đây — đây KHÔNG phải cơ chế bảo mật thật (xem README mục bảo mật)
+var LESSON_NAME = "Tin học 9 - Bài 3: Đánh giá chất lượng thông tin";
+var STORAGE_KEY = "thb3_state_v1";
+var LIVE_POLL_MS = 15000;
+
+function scriptConfigured(){
+  return GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.indexOf("PASTE_YOUR") === -1;
+}
+
+/* =====================================================================
+   1. DỮ LIỆU NỘI DUNG BÀI HỌC
+   ===================================================================== */
+var PREDICTIONS = [
+  {id:"p1", text:"Sẽ có ngay một trường được xếp hạng đầu tiên, phù hợp nhất với em."},
+  {id:"p2", text:"Kết quả sẽ gồm nhiều loại nguồn khác nhau — có nguồn đáng tin, có nguồn cần kiểm chứng lại."},
+  {id:"p3", text:"Công cụ tìm kiếm sẽ tự động loại bỏ hết những thông tin sai hoặc chưa xác thực."},
+  {id:"p4", text:"Mọi kết quả đầu tiên hiện ra đều là nguồn chính thức, đáng tin cậy nhất."}
+];
+
+var GOALS = [
+  {id:"tuyensinh", label:"Điểm chuẩn & chỉ tiêu tuyển sinh"},
+  {id:"ngoaikhoa", label:"Hoạt động ngoại khoá của trường"},
+  {id:"khoangcach", label:"Khoảng cách từ nhà đến trường"}
+];
+
+var BINS = [
+  {id:"reliable", label:"Dùng được ngay"},
+  {id:"verify", label:"Cần đối chiếu thêm"},
+  {id:"irrelevant", label:"Không phù hợp"}
+];
+
+var SEARCH_RESULTS = {
+  tuyensinh:[
+    {id:"t1", source:"official-edu", tagText:"Sở GD&ĐT", site:"so-gddt.tinh.edu.vn",
+     title:"Thông báo điểm chuẩn, chỉ tiêu tuyển sinh lớp 10 năm học 2026–2027",
+     snippet:"Sở Giáo dục và Đào tạo công bố điểm chuẩn, chỉ tiêu tuyển sinh của các trường THPT trên địa bàn tỉnh.",
+     date:"15 ngày trước", correct:"reliable",
+     explain:"Đúng cơ quan có thẩm quyền công bố điểm chuẩn — tên miền .edu.vn của Sở GD&ĐT."},
+    {id:"t2", source:"forum", tagText:"Nhóm phụ huynh", site:"Hội phụ huynh lớp 9 – Facebook",
+     title:"\"Nghe nói trường X năm nay lấy điểm cao lắm\"",
+     snippet:"Một phụ huynh chia sẻ thông tin nghe được, chưa dẫn nguồn xác nhận nào.",
+     date:"2 giờ trước", correct:"verify",
+     explain:"Thông tin truyền miệng trên mạng xã hội — cần đối chiếu với thông báo chính thức trước khi tin."},
+    {id:"t3", source:"news", tagText:"Báo điện tử", site:"baogiaoduc.vn",
+     title:"Điểm chuẩn dự kiến các trường THPT năm 2026",
+     snippet:"Bài phân tích xu hướng điểm chuẩn dựa trên số liệu các năm trước, mang tính dự đoán.",
+     date:"1 tháng trước", correct:"verify",
+     explain:"Báo uy tín nhưng là số liệu dự đoán — nên đối chiếu với thông báo chính thức của Sở khi có."},
+    {id:"t4", source:"ai", tagText:"Trợ lý AI", site:"Công cụ hội thoại thông minh",
+     title:"Trả lời: \"Điểm chuẩn trường X là bao nhiêu?\"",
+     snippet:"Công cụ AI đưa ra một con số, không nêu rõ nguồn hay năm cập nhật.",
+     date:"vừa tạo", correct:"verify",
+     explain:"AI hữu ích để khoanh vùng tìm kiếm, nhưng có thể lỗi thời — luôn kiểm tra lại nguồn gốc."}
+  ],
+  ngoaikhoa:[
+    {id:"n1", source:"official-school", tagText:"Website trường", site:"thpt-xyz.edu.vn",
+     title:"Các câu lạc bộ và hoạt động ngoại khoá năm học 2026",
+     snippet:"Website chính thức của nhà trường liệt kê đầy đủ câu lạc bộ và lịch hoạt động.",
+     date:"3 tuần trước", correct:"reliable",
+     explain:"Website chính thức của nhà trường — đúng nguồn có thẩm quyền về hoạt động ngoại khoá."},
+    {id:"n2", source:"official-edu", tagText:"Sở GD&ĐT", site:"so-gddt.tinh.edu.vn",
+     title:"Kế hoạch năm học 2026–2027",
+     snippet:"Văn bản chỉ đạo chung của Sở, không đi sâu vào hoạt động của từng trường.",
+     date:"2 tháng trước", correct:"irrelevant",
+     explain:"Nguồn đáng tin nhưng không đủ chi tiết cho mục đích này — nên tìm ở website trường."},
+    {id:"n3", source:"social", tagText:"Fanpage học sinh", site:"Trang Fanpage học sinh trường X",
+     title:"Ảnh hoạt động dã ngoại của câu lạc bộ Guitar",
+     snippet:"Vài hình ảnh không rõ ngày đăng, không kèm thông tin lịch hoạt động cụ thể.",
+     date:"không rõ", correct:"verify",
+     explain:"Có thể phản ánh thực tế nhưng thiếu thông tin cụ thể — cần đối chiếu với thông tin chính thức."},
+    {id:"n4", source:"news", tagText:"Trang rao vặt", site:"hoctap-meo.vn",
+     title:"10 mẹo học giỏi mà không cần cố gắng",
+     snippet:"Nội dung không liên quan đến hoạt động ngoại khoá của trường.",
+     date:"5 ngày trước", correct:"irrelevant",
+     explain:"Nội dung không liên quan đến mục đích tìm kiếm — không dùng được cho yêu cầu này."}
+  ],
+  khoangcach:[
+    {id:"k1", source:"official-edu", tagText:"Bản đồ trực tuyến", site:"maps · liên kết từ trang Sở GD&ĐT",
+     title:"Bản đồ vị trí các trường THPT trên địa bàn",
+     snippet:"Công cụ bản đồ hiển thị khoảng cách và tuyến đường thực tế từ một địa chỉ cụ thể.",
+     date:"cập nhật liên tục", correct:"reliable",
+     explain:"Công cụ bản đồ cho kết quả khoảng cách thực tế — đáng tin cho mục đích này."},
+    {id:"k2", source:"forum", tagText:"Nhóm học sinh", site:"Group \"Đi xe buýt đến trường\"",
+     title:"\"Từ nhà mình đến trường X mất khoảng 20 phút\"",
+     snippet:"Chia sẻ cá nhân — thời gian di chuyển tuỳ vào điểm xuất phát của từng người.",
+     date:"1 tuần trước", correct:"verify",
+     explain:"Trải nghiệm cá nhân có thể tham khảo nhưng không đúng cho trường hợp của em — nên tự kiểm tra bằng bản đồ."},
+    {id:"k3", source:"ai", tagText:"Trợ lý AI", site:"Công cụ hội thoại thông minh",
+     title:"Trả lời: \"Trường nào gần nhà tôi nhất?\"",
+     snippet:"AI cần biết địa chỉ cụ thể của em mới trả lời chính xác được.",
+     date:"vừa tạo", correct:"verify",
+     explain:"AI hữu ích để khoanh vùng, nhưng cần cung cấp địa chỉ cụ thể và kiểm tra lại bằng bản đồ thực tế."},
+    {id:"k4", source:"news", tagText:"Bài xếp hạng", site:"toptruong.vn",
+     title:"Top trường THPT tốt nhất tỉnh",
+     snippet:"Bài viết tổng hợp thành tích học tập, không đề cập vị trí địa lý cụ thể.",
+     date:"6 tháng trước", correct:"irrelevant",
+     explain:"Nội dung không phục vụ mục đích tìm khoảng cách — không dùng được cho yêu cầu này."}
+  ]
+};
+
+var QUIZ = [
+  {id:"q1", text:"Một bài viết về học phí trường Y được đăng cách đây 5 năm, không có ngày cập nhật mới. Điều này đáng lo ngại nhất về tiêu chí nào?",
+   opts:["Tính mới","Tính đầy đủ","Tính sử dụng được","Không đáng lo ngại vì học phí ít khi thay đổi"], correct:0,
+   ok:"Đúng — học phí, chỉ tiêu tuyển sinh thường thay đổi theo năm, thông tin 5 năm trước cần được cập nhật lại.",
+   hint:"Tiêu chí nào liên quan đến thời điểm đăng và cập nhật thông tin?"},
+  {id:"q2", text:"Em đọc được một bình luận tiêu cực về một trường trên mạng xã hội. Em nên làm gì trước khi tin?",
+   opts:["Tin ngay vì là trải nghiệm thật","Bỏ qua vì mạng xã hội không đáng tin","Đối chiếu với nhiều nguồn khác nhau trước khi kết luận","Hỏi bạn bè xem có đồng ý không"], correct:2,
+   ok:"Đúng — với những đánh giá tiêu cực, cần đối chiếu qua nhiều nguồn thông tin khác nhau trước khi kết luận.",
+   hint:"Tiêu chí tính chính xác yêu cầu điều gì khi có một thông tin gây tranh cãi?"},
+  {id:"q3", text:"Một bài viết chỉ nói về điểm chuẩn của trường, không đề cập học phí, khoảng cách, hay hoạt động ngoại khoá. Bài viết này…",
+   opts:["Đầy đủ, vì điểm chuẩn là quan trọng nhất","Chưa đầy đủ so với các yêu cầu tìm kiếm đã đặt ra","Không chính xác","Không mới"], correct:1,
+   ok:"Đúng — tính đầy đủ nghĩa là bao quát đủ các khía cạnh mà mục đích tìm kiếm cần, không chỉ một khía cạnh.",
+   hint:"So sánh nội dung bài viết với danh sách yêu cầu tìm kiếm mà em đã đặt ra."},
+  {id:"q4", text:"Một bài có tiêu đề hấp dẫn \"Bí quyết đỗ trường top 1\" nhưng nội dung chủ yếu quảng cáo khoá học thêm, không có thông tin cụ thể về trường em quan tâm. Bài viết này…",
+   opts:["Sử dụng được, vì tiêu đề liên quan","Không sử dụng được, vì nội dung không phục vụ đúng mục đích tìm kiếm","Rất chính xác","Rất đầy đủ"], correct:1,
+   ok:"Đúng — tính sử dụng được nghĩa là nội dung phải phục vụ đúng mục đích tìm kiếm, không chỉ để thu hút lượt xem.",
+   hint:"Nội dung bài viết có thực sự trả lời được câu hỏi ban đầu của em không?"}
+];
+
+var MATCH_ITEMS = [
+  {id:"m_moi", label:"Tính mới", def:"Thông tin được cập nhật gần đây, chưa lỗi thời"},
+  {id:"m_cx", label:"Tính chính xác", def:"Thông tin đúng sự thật, đã được đối chiếu từ nhiều nguồn"},
+  {id:"m_dd", label:"Tính đầy đủ", def:"Thông tin bao quát đủ các khía cạnh cần thiết cho mục đích tìm kiếm"},
+  {id:"m_sd", label:"Tính sử dụng được", def:"Thông tin liên quan trực tiếp, phục vụ đúng mục đích tìm kiếm"}
+];
+
+var SCHOOLS = [
+  {id:"A", name:"THPT Sao Mai", facts:"Điểm chuẩn 3 năm: nguồn Sở GD&ĐT, cập nhật tháng này · Ngoại khoá: nguồn website trường · Tỉ lệ đỗ ĐH: số liệu 3 năm trước, hơi cũ"},
+  {id:"B", name:"THPT Hùng Vương", facts:"Mọi khía cạnh đều có thông tin từ nguồn chính thức, cập nhật gần đây · Khoảng cách xa hơn (7km)"},
+  {id:"C", name:"THPT Nguyễn Trãi", facts:"Chủ yếu thông tin từ bài đăng mạng xã hội chưa kiểm chứng · Thiếu số liệu điểm chuẩn chính thức"}
+];
+var RANK_SUGGESTED = ["B","A","C"]; // B: đầy đủ + chính thống nhất; A: tốt nhưng hơi cũ; C: thiếu kiểm chứng nhất
+
+var SCENARIO_OPTS = [
+  "Loại trường đó khỏi danh sách ngay",
+  "Bỏ qua bình luận đó hoàn toàn",
+  "Tìm thêm thông tin từ nguồn khác để đối chiếu trước khi quyết định",
+  "Hỏi ngay bạn bè xem đúng không"
+];
+var SCENARIO_CORRECT = 2;
+var SCENARIO_OK = "Đúng — với thông tin chưa xác thực, nên tìm thêm nguồn đối chiếu (ví dụ website trường, Sở GD&ĐT) trước khi đưa vào quyết định.";
+var SCENARIO_HINT = "Tiêu chí tính chính xác gợi ý em nên làm gì khi thông tin chưa rõ nguồn?";
+
+var EXIT_Q2_OPTS = [
+  "Trên hội nhóm mạng xã hội của phụ huynh",
+  "Trên website của Sở Giáo dục và Đào tạo (dạng .edu.vn)",
+  "Trên một bài báo bất kỳ tìm được đầu tiên",
+  "Hỏi bạn bè cùng lớp"
+];
+var EXIT_Q2_CORRECT = 1;
+
+var MOODS = [
+  {id:"1", em:"😕", label:"Chưa hiểu"},
+  {id:"2", em:"🙂", label:"Hiểu một phần"},
+  {id:"3", em:"😊", label:"Khá hiểu"},
+  {id:"4", em:"🤩", label:"Em có thể giải thích cho bạn"}
+];
+
+/* =====================================================================
+   2. TRẠNG THÁI & LƯU TRỮ
+   ===================================================================== */
+function defaultState(){
+  return {
+    student:null,
+    currentPart:1,
+    parts:{
+      1:{predicted:null, done:false},
+      2:{selectedGoal:"tuyensinh", answers:{}, completedGoals:{}, done:false},
+      3:{answers:{}, attempts:{}, match:{}, matchChecked:false, matchCorrect:false, done:false},
+      4:{order:["A","B","C"], reason:"", rankSubmitted:false, scenarioAnswer:null, done:false},
+      5:{q1:"",q2:null,q3:"",q4:null,q5:"", done:false}
+    },
+    xp:0,
+    finished:false,
+    syncQueue:[]
+  };
+}
+var state = loadState();
+
+function loadState(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    var parsed = JSON.parse(raw);
+    var base = defaultState();
+    for(var k in parsed){ base[k] = parsed[k]; }
+    return base;
+  }catch(e){ return defaultState(); }
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+/* =====================================================================
+   3. SYNC — GOOGLE APPS SCRIPT
+   ===================================================================== */
+function nowIso(){ return new Date().toISOString(); }
+
+function buildPayload(action, extra){
+  var p = {
+    action: action,
+    studentId: state.student ? state.student.studentId : null,
+    studentName: state.student ? state.student.name : null,
+    className: state.student ? state.student.className : null,
+    lesson: LESSON_NAME,
+    timestamp: nowIso()
+  };
+  for(var k in extra){ p[k] = extra[k]; }
+  return p;
+}
+
+function queueAndSync(payload){
+  state.syncQueue.push(payload);
+  saveState();
+  flushQueue();
+}
+
+function flushQueue(){
+  if(!scriptConfigured()){ updateSyncBadge(); return; }
+  if(state.syncQueue.length === 0){ updateSyncBadge(); return; }
+  updateSyncBadge("syncing");
+  var next = state.syncQueue[0];
+  fetch(GOOGLE_SCRIPT_URL, {
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body: JSON.stringify(next)
+  }).then(function(res){
+    state.syncQueue.shift();
+    saveState();
+    if(state.syncQueue.length > 0){ flushQueue(); } else { updateSyncBadge("ok"); }
+  }).catch(function(err){
+    updateSyncBadge("offline");
+  });
+}
+
+function updateSyncBadge(mode){
+  var el = document.getElementById("sync-badge");
+  if(!el) return;
+  if(!scriptConfigured()){ el.textContent = "● chưa cấu hình đồng bộ"; el.style.color = "var(--ink-faint)"; return; }
+  if(mode === "syncing"){ el.textContent = "● đang đồng bộ…"; el.style.color = "var(--ink-faint)"; return; }
+  if(mode === "offline" || state.syncQueue.length > 0){ el.textContent = "⚠️ chưa đồng bộ"; el.style.color = "var(--amber)"; return; }
+  el.textContent = "☁️ đã đồng bộ"; el.style.color = "var(--success)";
+}
+
+window.addEventListener("online", flushQueue);
+
+/* =====================================================================
+   4. TIỆN ÍCH
+   ===================================================================== */
+function $(sel, ctx){ return (ctx||document).querySelector(sel); }
+function $all(sel, ctx){ return Array.prototype.slice.call((ctx||document).querySelectorAll(sel)); }
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+function slugClass(c){ return (c||"LOP").replace(/[^a-zA-Z0-9]/g,"").toUpperCase(); }
+function randToken(){ return Math.random().toString(36).slice(2,6).toUpperCase(); }
+
+var xpToastTimer = null;
+function grantXp(amount){
+  state.xp += amount;
+  saveState();
+  var t = document.getElementById("xp-toast");
+  t.textContent = "+" + amount + " XP";
+  t.classList.add("show");
+  clearTimeout(xpToastTimer);
+  xpToastTimer = setTimeout(function(){ t.classList.remove("show"); }, 1400);
+}
+
+/* =====================================================================
+   5. MÀN HÌNH WELCOME
+   ===================================================================== */
+function initWelcome(){
+  var classSel = $("#in-class");
+  classSel.addEventListener("change", function(){
+    $("#field-class-other").classList.toggle("hidden", classSel.value !== "__other");
+  });
+
+  if(state.student){
+    $("#welcome-resume").classList.remove("hidden");
+    $("#btn-start").textContent = "Tiếp tục bài học đã lưu";
+    $("#in-name").value = state.student.name;
+  }
+
+  $("#btn-new-session").addEventListener("click", function(){
+    if(confirm("Bắt đầu phiên mới sẽ xoá toàn bộ tiến trình đã lưu trên máy này. Tiếp tục?")){
+      state = defaultState();
+      saveState();
+      location.reload();
+    }
+  });
+
+  $("#btn-start").addEventListener("click", function(){
+    if(state.student){ enterLesson(); return; }
+    var name = $("#in-name").value.trim();
+    var cls = classSel.value === "__other" ? $("#in-class-other").value.trim() : classSel.value;
+    var err = $("#welcome-error");
+    if(!name || !cls){
+      err.textContent = "Vui lòng nhập đầy đủ họ tên và lớp trước khi bắt đầu.";
+      return;
+    }
+    err.textContent = "";
+    var studentId = slugClass(cls) + "_" + Date.now() + "_" + randToken();
+    state.student = {
+      name:name, className:cls, studentId:studentId,
+      sessionId:"PH-" + Date.now().toString(36).toUpperCase(),
+      startTime: nowIso()
+    };
+    saveState();
+    queueAndSync(buildPayload("start", {progress:0, score:0}));
+    enterLesson();
+  });
+}
+
+/* =====================================================================
+   6. MÀN HÌNH LESSON — khung & điều hướng
+   ===================================================================== */
+var TOTAL_PARTS = 5;
+
+function enterLesson(){
+  $("#screen-welcome").classList.add("hidden");
+  $("#screen-lesson").classList.remove("hidden");
+  $("#gear-btn").classList.remove("hidden");
+  $("#who-name").textContent = state.student.name;
+  $("#who-class").textContent = state.student.className;
+  renderSteps();
+  buildPart1(); buildPart2(); buildPart3(); buildPart4(); buildPart5();
+  goToPart(state.currentPart || 1);
+  updateSyncBadge();
+  flushQueue();
+}
+
+function renderSteps(){
+  var row = $("#steps-row");
+  row.innerHTML = "";
+  for(var i=1;i<=TOTAL_PARTS;i++){
+    var dot = el("div","step-dot", String(i));
+    if(state.parts[i].done) dot.classList.add("done");
+    else if(i === state.currentPart) dot.classList.add("current");
+    var wrap = el("div","step"); wrap.appendChild(dot);
+    row.appendChild(wrap);
+    if(i < TOTAL_PARTS){
+      var line = el("div","step-line");
+      if(state.parts[i].done) line.classList.add("done");
+      row.appendChild(line);
+    }
+  }
+}
+
+function isPartComplete(n){ return !!state.parts[n].done; }
+
+function goToPart(n){
+  state.currentPart = n;
+  saveState();
+  $all(".part").forEach(function(p){ p.classList.toggle("active", Number(p.dataset.part) === n); });
+  renderSteps();
+  $("#btn-back").style.visibility = n === 1 ? "hidden" : "visible";
+  var nextBtn = $("#btn-next");
+  if(n === TOTAL_PARTS){ nextBtn.classList.add("hidden"); }
+  else{ nextBtn.classList.remove("hidden"); nextBtn.disabled = !isPartComplete(n); }
+  $("#nav-hint").textContent = isPartComplete(n) ? "" : "Hoàn thành phần này để tiếp tục.";
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+$("#btn-back").addEventListener("click", function(){
+  if(state.currentPart > 1) goToPart(state.currentPart - 1);
+});
+$("#btn-next").addEventListener("click", function(){
+  if(!isPartComplete(state.currentPart)) return;
+  if(state.currentPart < TOTAL_PARTS) goToPart(state.currentPart + 1);
+});
+
+function markPartDone(n){
+  if(!state.parts[n].done){
+    state.parts[n].done = true;
+    saveState();
+  }
+  renderSteps();
+  if(state.currentPart === n){
+    $("#btn-next").disabled = false;
+    $("#nav-hint").textContent = "";
+  }
+}
+
+/* =====================================================================
+   7. PHẦN 1 — KHỞI ĐỘNG
+   ===================================================================== */
+function buildPart1(){
+  var grid = $("#predict-grid");
+  grid.innerHTML = "";
+  PREDICTIONS.forEach(function(p){
+    var opt = el("button","predict-option", p.text);
+    opt.type = "button";
+    if(state.parts[1].predicted === p.id) opt.classList.add("selected");
+    opt.addEventListener("click", function(){
+      $all(".predict-option", grid).forEach(function(o){ o.classList.remove("selected"); });
+      opt.classList.add("selected");
+      var first = !state.parts[1].predicted;
+      state.parts[1].predicted = p.id;
+      saveState();
+      if(first){
+        grantXp(10);
+        queueAndSync(buildPayload("submit", {activity:"part1_prediction", answer:p.id, correct:null, attempts:1, score:0, progress:20}));
+      }
+      markPartDone(1);
+    });
+    grid.appendChild(opt);
+  });
+}
+
+/* =====================================================================
+   8. PHẦN 2 — TRẠM TÌM KIẾM
+   ===================================================================== */
+function buildPart2(){
+  var goalRow = $("#goal-row");
+  goalRow.innerHTML = "";
+  GOALS.forEach(function(g){
+    var chip = el("button","goal-chip", '<span class="tick"></span>' + g.label);
+    chip.type = "button";
+    if(state.parts[2].selectedGoal === g.id) chip.classList.add("active");
+    if(state.parts[2].completedGoals[g.id]) chip.classList.add("complete");
+    chip.addEventListener("click", function(){
+      state.parts[2].selectedGoal = g.id;
+      saveState();
+      renderGoalRow();
+      renderResults();
+    });
+    chip._goalId = g.id;
+    goalRow.appendChild(chip);
+  });
+  renderResults();
+}
+function renderGoalRow(){
+  $all(".goal-chip").forEach(function(chip){
+    chip.classList.toggle("active", state.parts[2].selectedGoal === chip._goalId);
+    chip.classList.toggle("complete", !!state.parts[2].completedGoals[chip._goalId]);
+  });
+}
+function renderResults(){
+  var goal = state.parts[2].selectedGoal;
+  var grid = $("#result-grid");
+  grid.innerHTML = "";
+  SEARCH_RESULTS[goal].forEach(function(r){
+    var card = el("div","result-card");
+    var meta = el("div","result-meta");
+    meta.innerHTML =
+      '<span class="source-tag tag-'+r.source+'">'+r.tagText+'</span>' +
+      '<span class="result-site">'+r.site+'</span>' +
+      '<span class="result-date">'+r.date+'</span>';
+    card.appendChild(meta);
+    card.appendChild(el("div","result-title", r.title));
+    card.appendChild(el("div","result-snippet", r.snippet));
+
+    var classifyRow = el("div","classify-row");
+    var fb = el("div","result-feedback");
+    var answered = state.parts[2].answers[r.id];
+
+    BINS.forEach(function(b){
+      var btn = el("button","classify-btn", b.label);
+      btn.type = "button";
+      if(answered === b.id){
+        btn.classList.add(b.id === r.correct ? "chosen-correct" : "chosen-wrong");
+      }
+      btn.addEventListener("click", function(){
+        state.parts[2].answers[r.id] = b.id;
+        var correct = b.id === r.correct;
+        $all(".classify-btn", classifyRow).forEach(function(x){ x.classList.remove("chosen-correct","chosen-wrong"); });
+        btn.classList.add(correct ? "chosen-correct" : "chosen-wrong");
+        fb.textContent = (correct ? "✅ Chính xác. " : "🔎 Chưa chính xác — thử lại nhé. ") + r.explain;
+        fb.className = "result-feedback show " + (correct ? "ok" : "retry");
+        saveState();
+        queueAndSync(buildPayload("submit", {
+          activity:"part2_"+goal+"_"+r.id, answer:b.id, correct:correct, attempts:1, score: correct?10:0, progress:null
+        }));
+        if(correct) checkGoalComplete(goal);
+      });
+      classifyRow.appendChild(btn);
+    });
+    card.appendChild(classifyRow);
+    card.appendChild(fb);
+    if(answered){
+      var correctNow = answered === r.correct;
+      fb.textContent = (correctNow ? "✅ Chính xác. " : "🔎 Chưa chính xác — thử lại nhé. ") + r.explain;
+      fb.className = "result-feedback show " + (correctNow ? "ok" : "retry");
+    }
+    grid.appendChild(card);
+  });
+}
+function checkGoalComplete(goal){
+  var items = SEARCH_RESULTS[goal];
+  var allCorrect = items.every(function(r){ return state.parts[2].answers[r.id] === r.correct; });
+  if(allCorrect && !state.parts[2].completedGoals[goal]){
+    state.parts[2].completedGoals[goal] = true;
+    saveState();
+    grantXp(10);
+    renderGoalRow();
+    var doneCount = Object.keys(state.parts[2].completedGoals).length;
+    if(doneCount >= GOALS.length){
+      markPartDone(2);
+    }
+  }
+}
+
+/* =====================================================================
+   9. PHẦN 3 — 4 TIÊU CHÍ
+   ===================================================================== */
+function buildPart3(){
+  var list = $("#quiz-list");
+  list.innerHTML = "";
+  QUIZ.forEach(function(q, idx){
+    var card = el("div","card quiz-q");
+    card.appendChild(el("div","q-num", "Câu " + (idx+1)));
+    card.appendChild(el("div","q-text", q.text));
+    var optsWrap = el("div","quiz-opts");
+    var fb = el("div","quiz-feedback");
+    var retryBtn = el("button","btn btn-ghost btn-sm retry-btn hidden", "Thử lại");
+    retryBtn.type = "button";
+
+    function render(){
+      optsWrap.innerHTML = "";
+      q.opts.forEach(function(optText, oi){
+        var b = el("button","quiz-opt", optText);
+        b.type = "button";
+        var chosen = state.parts[3].answers[q.id];
+        if(chosen !== undefined){
+          if(oi === q.correct) b.classList.add("correct");
+          else if(oi === chosen) b.classList.add("wrong");
+        }
+        b.addEventListener("click", function(){
+          var isFirstAttempt = state.parts[3].attempts[q.id] === undefined;
+          state.parts[3].attempts[q.id] = (state.parts[3].attempts[q.id]||0) + 1;
+          state.parts[3].answers[q.id] = oi;
+          var correct = oi === q.correct;
+          saveState();
+          render();
+          if(correct){
+            fb.textContent = "✅ Chính xác! " + q.ok;
+            fb.className = "quiz-feedback show ok";
+            retryBtn.classList.add("hidden");
+            if(!state.parts[3].xpGiven){ state.parts[3].xpGiven = {}; }
+            if(!state.parts[3].xpGiven[q.id]){ state.parts[3].xpGiven[q.id] = true; grantXp(10); }
+            saveState();
+            queueAndSync(buildPayload("submit", {activity:"part3_"+q.id, answer:oi, correct:true, attempts:state.parts[3].attempts[q.id], score:10, progress:null}));
+            checkPart3Complete();
+          } else {
+            fb.innerHTML = "🔎 Chưa chính xác.<br>💡 Gợi ý: " + q.hint;
+            fb.className = "quiz-feedback show retry";
+            retryBtn.classList.remove("hidden");
+            queueAndSync(buildPayload("submit", {activity:"part3_"+q.id, answer:oi, correct:false, attempts:state.parts[3].attempts[q.id], score:0, progress:null}));
+          }
+        });
+        optsWrap.appendChild(b);
+      });
+    }
+    render();
+    retryBtn.addEventListener("click", function(){
+      state.parts[3].answers[q.id] = undefined;
+      delete state.parts[3].answers[q.id];
+      saveState();
+      render();
+      fb.className = "quiz-feedback";
+      retryBtn.classList.add("hidden");
+    });
+
+    card.appendChild(optsWrap);
+    card.appendChild(fb);
+    card.appendChild(retryBtn);
+    list.appendChild(card);
+
+    if(state.parts[3].answers[q.id] === q.correct){
+      fb.textContent = "✅ Chính xác! " + q.ok;
+      fb.className = "quiz-feedback show ok";
+    }
+  });
+
+  buildMatch();
+}
+
+function buildMatch(){
+  var wrap = $("#match-list");
+  wrap.innerHTML = "";
+  var defs = MATCH_ITEMS.map(function(m){ return m.def; });
+  MATCH_ITEMS.forEach(function(m){
+    var row = el("div","match-row");
+    row.appendChild(el("div","match-label", m.label));
+    var sel = document.createElement("select");
+    sel.appendChild(new Option("— Chọn định nghĩa —",""));
+    defs.forEach(function(d){ sel.appendChild(new Option(d, d)); });
+    if(state.parts[3].match[m.id]) sel.value = state.parts[3].match[m.id];
+    sel.addEventListener("change", function(){
+      state.parts[3].match[m.id] = sel.value;
+      saveState();
+    });
+    row.appendChild(sel);
+    row._select = sel; row._id = m.id;
+    wrap.appendChild(row);
+  });
+
+  $("#btn-check-match").addEventListener("click", function(){
+    var allRight = true;
+    $all(".match-row", wrap).forEach(function(row){
+      var m = MATCH_ITEMS.filter(function(x){ return x.id === row._id; })[0];
+      var chosen = row._select.value;
+      var ok = chosen === m.def;
+      row.classList.remove("correct","wrong");
+      row.classList.add(ok ? "correct" : "wrong");
+      if(!ok) allRight = false;
+    });
+    state.parts[3].matchChecked = true;
+    state.parts[3].matchCorrect = allRight;
+    saveState();
+    var fb = $("#match-feedback");
+    if(allRight){
+      fb.textContent = "✅ Chính xác! Em đã ghép đúng cả 4 tiêu chí.";
+      fb.className = "quiz-feedback show ok";
+      if(!state.parts[3].matchXpGiven){ state.parts[3].matchXpGiven = true; grantXp(10); }
+      queueAndSync(buildPayload("submit", {activity:"part3_match", answer:"ok", correct:true, attempts:1, score:10, progress:null}));
+      checkPart3Complete();
+    } else {
+      fb.textContent = "🔎 Một vài ô chưa khớp (đã đánh dấu đỏ). Xem lại định nghĩa và thử lại.";
+      fb.className = "quiz-feedback show retry";
+    }
+    saveState();
+  }, {once:false});
+}
+
+function checkPart3Complete(){
+  var allQuizOk = QUIZ.every(function(q){ return state.parts[3].answers[q.id] === q.correct; });
+  if(allQuizOk && state.parts[3].matchCorrect){
+    markPartDone(3);
+  }
+}
+
+/* =====================================================================
+   10. PHẦN 4 — VẬN DỤNG
+   ===================================================================== */
+function buildPart4(){
+  renderRankList();
+  $("#rank-reason").value = state.parts[4].reason || "";
+  $("#rank-reason").addEventListener("input", function(){
+    state.parts[4].reason = this.value;
+    saveState();
+  });
+  $("#btn-submit-rank").addEventListener("click", function(){
+    if($("#rank-reason").value.trim().length < 5){
+      var fb = $("#rank-feedback");
+      fb.textContent = "Hãy viết ít nhất một câu giải thích lý do xếp thứ tự trước khi ghi nhận.";
+      fb.className = "quiz-feedback show retry";
+      return;
+    }
+    state.parts[4].reason = $("#rank-reason").value;
+    state.parts[4].rankSubmitted = true;
+    saveState();
+    var order = state.parts[4].order;
+    var matchesSuggested = JSON.stringify(order) === JSON.stringify(RANK_SUGGESTED);
+    var fb = $("#rank-feedback");
+    var orderNames = order.map(function(id){ return SCHOOLS.filter(function(s){return s.id===id;})[0].name; }).join(" → ");
+    if(matchesSuggested){
+      fb.innerHTML = "✅ Thứ tự em chọn (" + orderNames + ") khớp với gợi ý dựa trên chất lượng thông tin: trường có nguồn thông tin đầy đủ, chính thống và mới nhất nên được ưu tiên trước.";
+      fb.className = "quiz-feedback show ok";
+    } else {
+      fb.innerHTML = "💡 Em xếp: " + orderNames + ". Gợi ý tham khảo: <b>THPT Hùng Vương → THPT Sao Mai → THPT Nguyễn Trãi</b>, vì Hùng Vương có thông tin đầy đủ và chính thống nhất, còn Nguyễn Trãi thiếu số liệu đã kiểm chứng nhất. Không sao nếu em có lý do khác — quan trọng là thứ tự dựa trên chất lượng thông tin, không phải cảm tính.";
+      fb.className = "quiz-feedback show retry";
+    }
+    if(!state.parts[4].rankXpGiven){ state.parts[4].rankXpGiven = true; grantXp(20); }
+    saveState();
+    queueAndSync(buildPayload("submit", {activity:"part4_ranking", answer:order.join(">"), correct:matchesSuggested, attempts:1, score: matchesSuggested?20:10, progress:null}));
+    checkPart4Complete();
+  });
+
+  var optsWrap = $("#scenario-opts");
+  optsWrap.innerHTML = "";
+  SCENARIO_OPTS.forEach(function(text, oi){
+    var b = el("button","quiz-opt", text);
+    b.type = "button";
+    if(state.parts[4].scenarioAnswer === oi){
+      b.classList.add(oi === SCENARIO_CORRECT ? "correct" : "wrong");
+    }
+    b.addEventListener("click", function(){
+      state.parts[4].scenarioAnswer = oi;
+      saveState();
+      $all(".quiz-opt", optsWrap).forEach(function(x){ x.classList.remove("correct","wrong"); });
+      var correct = oi === SCENARIO_CORRECT;
+      b.classList.add(correct ? "correct" : "wrong");
+      var fb = $("#scenario-feedback");
+      if(correct){
+        fb.textContent = "✅ Chính xác! " + SCENARIO_OK;
+        fb.className = "quiz-feedback show ok";
+        if(!state.parts[4].scenarioXpGiven){ state.parts[4].scenarioXpGiven = true; grantXp(10); }
+      } else {
+        fb.innerHTML = "🔎 Chưa chính xác.<br>💡 Gợi ý: " + SCENARIO_HINT;
+        fb.className = "quiz-feedback show retry";
+      }
+      saveState();
+      queueAndSync(buildPayload("submit", {activity:"part4_scenario", answer:oi, correct:correct, attempts:1, score:correct?10:0, progress:null}));
+      checkPart4Complete();
+    });
+    optsWrap.appendChild(b);
+  });
+}
+function renderRankList(){
+  var list = $("#rank-list");
+  list.innerHTML = "";
+  state.parts[4].order.forEach(function(id, idx){
+    var s = SCHOOLS.filter(function(x){ return x.id === id; })[0];
+    var item = el("div","rank-item");
+    item.appendChild(el("div","rank-num", String(idx+1)));
+    var body = el("div","rank-body");
+    body.appendChild(el("div","rank-name", s.name));
+    body.appendChild(el("div","rank-facts", s.facts));
+    item.appendChild(body);
+    var moveWrap = el("div","rank-move");
+    var up = el("button", null, "▲"); up.type="button"; up.disabled = idx===0;
+    var down = el("button", null, "▼"); down.type="button"; down.disabled = idx===state.parts[4].order.length-1;
+    up.addEventListener("click", function(){ swapRank(idx, idx-1); });
+    down.addEventListener("click", function(){ swapRank(idx, idx+1); });
+    moveWrap.appendChild(up); moveWrap.appendChild(down);
+    item.appendChild(moveWrap);
+    list.appendChild(item);
+  });
+}
+function swapRank(i, j){
+  var arr = state.parts[4].order;
+  var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  saveState();
+  renderRankList();
+}
+function checkPart4Complete(){
+  if(state.parts[4].rankSubmitted && state.parts[4].scenarioAnswer !== null){
+    markPartDone(4);
+  }
+}
+
+/* =====================================================================
+   11. PHẦN 5 — EXIT TICKET
+   ===================================================================== */
+function buildPart5(){
+  $("#exit-q1").value = state.parts[5].q1 || "";
+  $("#exit-q1").addEventListener("input", function(){ state.parts[5].q1 = this.value; saveState(); checkPart5Ready(); });
+
+  var q2wrap = $("#exit-q2-opts");
+  q2wrap.innerHTML = "";
+  EXIT_Q2_OPTS.forEach(function(text, oi){
+    var b = el("button","quiz-opt", text);
+    b.type = "button";
+    if(state.parts[5].q2 === oi) b.classList.add(oi===EXIT_Q2_CORRECT ? "correct":"wrong");
+    b.addEventListener("click", function(){
+      state.parts[5].q2 = oi;
+      saveState();
+      $all(".quiz-opt", q2wrap).forEach(function(x){ x.classList.remove("correct","wrong"); });
+      b.classList.add(oi===EXIT_Q2_CORRECT ? "correct":"wrong");
+      checkPart5Ready();
+    });
+    q2wrap.appendChild(b);
+  });
+
+  $("#exit-q3").value = state.parts[5].q3 || "";
+  $("#exit-q3").addEventListener("input", function(){ state.parts[5].q3 = this.value; saveState(); checkPart5Ready(); });
+
+  var moodWrap = $("#mood-row");
+  moodWrap.innerHTML = "";
+  MOODS.forEach(function(m){
+    var b = el("button","mood-btn", '<span class="em">'+m.em+'</span>'+m.label);
+    b.type = "button";
+    if(state.parts[5].q4 === m.id) b.classList.add("selected");
+    b.addEventListener("click", function(){
+      state.parts[5].q4 = m.id;
+      saveState();
+      $all(".mood-btn", moodWrap).forEach(function(x){ x.classList.remove("selected"); });
+      b.classList.add("selected");
+      checkPart5Ready();
+    });
+    moodWrap.appendChild(b);
+  });
+
+  $("#exit-q5").value = state.parts[5].q5 || "";
+  $("#exit-q5").addEventListener("input", function(){ state.parts[5].q5 = this.value; saveState(); });
+
+  $("#btn-finish").addEventListener("click", finishLesson);
+  checkPart5Ready();
+}
+function checkPart5Ready(){
+  var ready = state.parts[5].q1.trim().length > 0 && state.parts[5].q2 !== null &&
+              state.parts[5].q3.trim().length > 0 && state.parts[5].q4 !== null;
+  $("#btn-finish").disabled = !ready;
+}
+
+function finishLesson(){
+  state.parts[5].done = true;
+  saveState();
+  grantXp(10);
+  queueAndSync(buildPayload("exit", {
+    q1: state.parts[5].q1, q2: state.parts[5].q2, q3: state.parts[5].q3,
+    q4: state.parts[5].q4, q5: state.parts[5].q5, progress:100
+  }));
+  var totalPossible = 10+10+10+10+40+10+20+10+10; // rough max for score%
+  var score = Math.min(100, Math.round((state.xp/totalPossible)*100));
+  state.finished = true;
+  state.finalScore = score;
+  saveState();
+  queueAndSync(buildPayload("complete", {progress:100, score:score, xp:state.xp}));
+  showComplete(score);
+}
+function showComplete(score){
+  $("#screen-lesson").classList.add("hidden");
+  $("#screen-complete").classList.remove("hidden");
+  $("#complete-who").textContent = state.student.name + " · " + state.student.className;
+  $("#complete-xp").textContent = state.xp + " XP";
+  $("#complete-score").textContent = score + "%";
+  var doneCount = [1,2,3,4,5].filter(function(n){ return state.parts[n].done; }).length;
+  $("#complete-progress").textContent = doneCount + "/5";
+}
+$("#btn-review").addEventListener("click", function(){
+  $("#screen-complete").classList.add("hidden");
+  $("#screen-lesson").classList.remove("hidden");
+  goToPart(1);
+});
+
+/* =====================================================================
+   12. TEACHER MODE
+   ===================================================================== */
+var teacherData = null;
+$("#gear-btn").addEventListener("click", function(){ $("#teacher-pin-overlay").classList.remove("hidden"); $("#pin-input").focus(); });
+$("#pin-cancel").addEventListener("click", function(){ $("#teacher-pin-overlay").classList.add("hidden"); $("#pin-input").value=""; $("#pin-error").textContent=""; });
+$("#pin-submit").addEventListener("click", submitPin);
+$("#pin-input").addEventListener("keydown", function(e){ if(e.key==="Enter") submitPin(); });
+function submitPin(){
+  if($("#pin-input").value === TEACHER_PIN){
+    $("#teacher-pin-overlay").classList.add("hidden");
+    $("#pin-input").value=""; $("#pin-error").textContent="";
+    openTeacherDash();
+  } else {
+    $("#pin-error").textContent = "PIN không đúng.";
+  }
+}
+$("#teacher-close").addEventListener("click", function(){
+  $("#teacher-overlay").classList.add("hidden");
+  clearInterval(livePollTimer);
+});
+$all(".t-tab").forEach(function(tab){
+  tab.addEventListener("click", function(){
+    $all(".t-tab").forEach(function(t){ t.classList.remove("active"); });
+    tab.classList.add("active");
+    $all(".t-panel").forEach(function(p){ p.classList.toggle("active", p.dataset.tpanel === tab.dataset.tab); });
+  });
+});
+$("#t-refresh").addEventListener("click", loadTeacherData);
+$("#t-search").addEventListener("input", renderResultsTable);
+$("#t-filter").addEventListener("change", renderResultsTable);
+
+var livePollTimer = null;
+function openTeacherDash(){
+  $("#teacher-overlay").classList.remove("hidden");
+  loadTeacherData();
+  clearInterval(livePollTimer);
+  livePollTimer = setInterval(loadTeacherData, LIVE_POLL_MS);
+}
+
+function loadTeacherData(){
+  var loading = $("#t-loading"), empty = $("#t-empty");
+  empty.classList.add("hidden");
+  if(!scriptConfigured()){
+    loading.classList.add("hidden");
+    empty.textContent = "Chưa kết nối Google Sheet. Dán URL Google Apps Script vào biến GOOGLE_SCRIPT_URL trong mã nguồn để xem dữ liệu cả lớp (xem README).";
+    empty.classList.remove("hidden");
+    $("#t-overview").innerHTML = "";
+    $("#t-table-body").innerHTML = "";
+    $("#live-grid").innerHTML = "";
+    return;
+  }
+  loading.classList.remove("hidden");
+  fetch(GOOGLE_SCRIPT_URL + "?action=teacherData&lesson=" + encodeURIComponent(LESSON_NAME))
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      loading.classList.add("hidden");
+      teacherData = data;
+      if(!data.students || data.students.length === 0){
+        empty.textContent = "Chưa có học sinh nào nộp bài. Dữ liệu sẽ hiện ra ngay khi học sinh bắt đầu làm bài.";
+        empty.classList.remove("hidden");
+      }
+      renderOverview();
+      renderResultsTable();
+      renderLiveGrid();
+    })
+    .catch(function(err){
+      loading.classList.add("hidden");
+      empty.textContent = "Không tải được dữ liệu từ Google Sheet. Kiểm tra lại URL deploy và quyền truy cập của Web App (xem README).";
+      empty.classList.remove("hidden");
+    });
+}
+
+function renderOverview(){
+  var ov = $("#t-overview");
+  if(!teacherData || !teacherData.students){ ov.innerHTML=""; return; }
+  var s = teacherData.students;
+  var started = s.length;
+  var completed = s.filter(function(x){ return x.progress >= 100; }).length;
+  var inProgress = started - completed;
+  var avg = started ? Math.round(s.reduce(function(a,x){return a+(x.score||0);},0)/started) : 0;
+
+  ov.innerHTML = "";
+  var grid = el("div","stat-grid");
+  [["👥 "+started,"Học sinh đã vào học"], ["✅ "+completed,"Đã hoàn thành"], ["⏳ "+inProgress,"Đang học"], [avg+"%","Điểm trung bình"]].forEach(function(pair){
+    var box = el("div","stat-box");
+    box.appendChild(el("div","num", pair[0]));
+    box.appendChild(el("div","lbl", pair[1]));
+    grid.appendChild(box);
+  });
+  ov.appendChild(grid);
+
+  if(teacherData.hardestActivity){
+    var note = el("div","empty-note", "Phần có nhiều học sinh sai nhất / câu khó nhất: <b>" + teacherData.hardestActivity + "</b>");
+    ov.appendChild(note);
+  }
+}
+
+function renderResultsTable(){
+  var body = $("#t-table-body");
+  body.innerHTML = "";
+  if(!teacherData || !teacherData.students) return;
+  var q = ($("#t-search").value||"").toLowerCase();
+  var filter = $("#t-filter").value;
+  teacherData.students
+    .filter(function(x){
+      var matchesQ = !q || (x.name||"").toLowerCase().indexOf(q)>-1 || (x.className||"").toLowerCase().indexOf(q)>-1;
+      var matchesF = filter==="all" || (filter==="done" && x.progress>=100) || (filter==="notdone" && x.progress<100);
+      return matchesQ && matchesF;
+    })
+    .forEach(function(x){
+      var tr = document.createElement("tr");
+      var pillClass = x.progress>=100 ? "pill-done" : (x.progress>0 ? "pill-doing" : "pill-notstarted");
+      var pillText = x.progress>=100 ? "Hoàn thành" : (x.progress>0 ? "Đang học" : "Chưa bắt đầu");
+      tr.innerHTML =
+        "<td>"+(x.name||"—")+"</td><td>"+(x.className||"—")+"</td>" +
+        "<td><span class='status-pill "+pillClass+"'>"+pillText+" · "+(x.progress||0)+"%</span></td>" +
+        "<td>"+(x.score!=null?x.score+"%":"—")+"</td>" +
+        "<td>"+(x.hasExit? "Đã nộp" : "Chưa nộp")+"</td>" +
+        "<td>"+(x.startTime? new Date(x.startTime).toLocaleString("vi-VN") : "—")+"</td>";
+      tr.addEventListener("click", function(){ showStudentDetail(x); });
+      body.appendChild(tr);
+    });
+}
+
+function showStudentDetail(x){
+  var box = $("#student-detail");
+  box.classList.remove("hidden");
+  var html = "<h4>"+ (x.name||"—") +" · "+ (x.className||"—") +"</h4>";
+  html += "<div class='detail-row'><span class='k'>Mã học sinh</span><span>"+(x.studentId||"—")+"</span></div>";
+  html += "<div class='detail-row'><span class='k'>Tiến độ</span><span>"+(x.progress||0)+"%</span></div>";
+  html += "<div class='detail-row'><span class='k'>Điểm</span><span>"+(x.score!=null?x.score+"%":"—")+"</span></div>";
+  (x.activities||[]).forEach(function(a){
+    html += "<div class='detail-row'><span class='k'>"+a.activity+"</span><span>"+(a.answer)+ (a.correct===true?" ✅":a.correct===false?" ❌":"") +" · "+ (a.attempts||1) +" lần</span></div>";
+  });
+  if(x.exit){
+    html += "<div class='detail-row'><span class='k'>Exit · học được</span><span>"+(x.exit.q1||"—")+"</span></div>";
+    html += "<div class='detail-row'><span class='k'>Exit · mức hiểu</span><span>"+(x.exit.q4||"—")+"</span></div>";
+    html += "<div class='detail-row'><span class='k'>Exit · còn thắc mắc</span><span>"+(x.exit.q5||"— không có —")+"</span></div>";
+  }
+  box.innerHTML = html;
+  box.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function renderLiveGrid(){
+  var grid = $("#live-grid");
+  grid.innerHTML = "";
+  if(!teacherData || !teacherData.students) return;
+  teacherData.students.forEach(function(x){
+    var card = el("div","live-card");
+    var status = x.progress>=100 ? "✅ Hoàn thành" : (x.progress>0 ? "🟢 Đang học" : "🔴 Chưa bắt đầu");
+    card.innerHTML = "<div class='nm'>"+(x.name||"—")+"</div><div>"+(x.className||"—")+" · "+status+"</div>";
+    grid.appendChild(card);
+  });
+}
+
+/* =====================================================================
+   13. KHỞI CHẠY
+   ===================================================================== */
+if(state.finished){
+  // đã hoàn thành trước đó — vẫn cho vào welcome để chọn xem lại hoặc phiên mới
+}
+initWelcome();
+
+})();
+</script>
+</body>
+</html>
